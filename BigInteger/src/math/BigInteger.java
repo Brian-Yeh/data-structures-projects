@@ -65,7 +65,7 @@ public class BigInteger {
 		if (integer.length() == 1 && !Character.isDigit(integer.charAt(0)))
 			throw new IllegalArgumentException();
 		
-		integer = processString(integer);
+		integer = processString(integer); // remove spaces before and after string
 		
 		// check rest of String
 		for (int i = 1; i < integer.length(); i++) {
@@ -111,6 +111,7 @@ public class BigInteger {
 		return b;
 	}
 	
+	// removes spaces at beginning and end of string
 	private static String processString(String s) {
 		int index = 0;
 		while(s.charAt(index) == ' ' && index != s.length()) {
@@ -191,8 +192,10 @@ public class BigInteger {
 			botOp = botOp.next;
 			
 			// add node for carry if needed
-			if (topOp == null && botOp == null && needCarry)
+			if (topOp == null && botOp == null && needCarry) {
 				sumLast.next = new DigitNode(1, null);
+				sum.numDigits++;
+			}
 		}
 		
 		// iterate through remaining digits in top operand
@@ -215,8 +218,10 @@ public class BigInteger {
 			topOp = topOp.next;
 			
 			// add node for carry if needed
-			if (topOp == null && needCarry)
+			if (topOp == null && needCarry) {
 				sumLast.next = new DigitNode(1, null);
+				sum.numDigits++;
+			}
 		}
 		
 		// resolve negative
@@ -226,17 +231,19 @@ public class BigInteger {
 		return sum;
 	}
 	
+	// subtract function for add
 	private BigInteger subtract(BigInteger other) {
 		boolean needNegative = false;
 		DigitNode topOp, botOp; 
 		
-		// 
-		if (this.absLargerThan(other) == 1) {
+		// set topOp to BigInteger with largest absolute value
+		int absValueReturn = this.absLargerThan(other);
+		if (absValueReturn == 1) {
 			topOp = this.front;
 			botOp = other.front;
 			if (this.negative == true)
 				needNegative = true;
-		} else if (this.absLargerThan(other) == -1) {
+		} else if (absValueReturn == -1) {
 			topOp = other.front;
 			botOp = this.front;
 			if (other.negative == true)
@@ -245,10 +252,13 @@ public class BigInteger {
 			return BigInteger.parse("0");
 		}
 		
+		// carry flag
 		boolean needCarry = false;
 		
 		BigInteger diff = new BigInteger();
-		DigitNode diffLast = null;
+		DigitNode diffLast = null; // pointer for last node in diff
+		int numZeros = 0;
+		boolean needZeros = false;
 		
 		while (botOp != null) {
 			int topDigit = topOp.digit;
@@ -264,30 +274,58 @@ public class BigInteger {
 				needCarry = true;
 			}
 			
-			DigitNode d = new DigitNode(topDigit - botDigit, null);
-			topOp = topOp.next;
-			botOp = botOp.next;
-			
-			if (diff.front == null) {
-				diff.front = d;
-				diffLast = diff.front;
+			// account for zeros in front
+			if (topDigit - botDigit != 0) {
+				if (needZeros == true) {
+					for (int i = 0; i < numZeros; i++) {
+						if (diff.front == null) {
+							diff.front = new DigitNode(0, null);
+							diffLast = diff.front;
+						}
+						else {
+							diffLast.next = new DigitNode(0, null);
+							diffLast = diffLast.next;
+						}
+						diff.numDigits++;
+					}
+					needZeros = false;
+					numZeros = 0;
+				}
+				DigitNode d = new DigitNode(topDigit - botDigit, null);
+				
+				topOp = topOp.next;
+				botOp = botOp.next;
+				
+				if (diff.front == null) {
+					diff.front = d;
+					diffLast = diff.front;
+				}
+				else {
+					if (topOp == null && botOp == null && d.digit == 0) {
+						
+						break;
+					}
+						
+					diffLast.next = d;
+					diffLast = d;
+				}
+				
+				diff.numDigits++;
 			}
 			else {
-				if (topOp == null && botOp == null && d.digit == 0) {
-					
-					break;
-				}
-					
-				diffLast.next = d;
-				diffLast = d;
+				needZeros = true;
+				numZeros++;
+				topOp = topOp.next;
+				botOp = botOp.next;
+				continue;
 			}
-			
-			diff.numDigits++;
 		}
 		
+		// iterate through rest of top operand
 		while (topOp != null) {
 			int digit = topOp.digit;
 			
+			// resolve carry
 			if (needCarry) {
 				digit--;
 				needCarry = false;
@@ -303,10 +341,27 @@ public class BigInteger {
 				break;
 			}
 			
-			DigitNode d = new DigitNode(digit, null);
-			diffLast.next = d;
-			diffLast = d;
-			diff.numDigits++;
+			// account for zeros in front while adding nodes to diff
+			if (digit != 0) {
+				// add held zeros
+				if (needZeros == true) {
+					for (int i = 0; i < numZeros; i++) {
+						diffLast.next = new DigitNode(0, null);
+						diffLast = diffLast.next;
+						diff.numDigits++;
+					}
+					needZeros = false;
+					numZeros = 0;
+				}
+				DigitNode d = new DigitNode(digit, null);
+				diffLast.next = d;
+				diffLast = d;
+				diff.numDigits++;
+			} else {
+				needZeros = true;
+				numZeros++;
+				continue;
+			}
 		}
 		
 		if (needNegative)
@@ -326,16 +381,50 @@ public class BigInteger {
 		else if (this.numDigits < other.numDigits)
 			return -1;
 		
-		int thisValue = Math.abs(Integer.parseInt(this.toString()));
-		int otherValue = Math.abs(Integer.parseInt(other.toString()));
+//		int thisValue = Math.abs(Integer.parseInt(this.toString()));
+//		int otherValue = Math.abs(Integer.parseInt(other.toString()));
+//		
+//		if (thisValue > otherValue)
+//			return 1;
+//		else if (thisValue < otherValue)
+//			return -1;
+//		else
+//			return 0;
 		
-		if (thisValue > otherValue)
-			return 1;
-		else if (thisValue < otherValue)
-			return -1;
-		else
-			return 0;
+		// In case where numDigits equal, find greater BigInteger by
+		// storing BigIntegers in greatest to least significant order and comparing
+		BigInteger thisReverse = new BigInteger();
+		BigInteger otherReverse = new BigInteger();
 		
+		thisReverse.front = new DigitNode(this.front.digit, null);
+		thisReverse.numDigits++;
+		for (DigitNode ptr = this.front.next; ptr != null; ptr = ptr.next) {
+			DigitNode tempNode = new DigitNode(ptr.digit, thisReverse.front);
+			thisReverse.front = tempNode;
+			thisReverse.numDigits++;
+		}
+		
+		otherReverse.front = new DigitNode(other.front.digit, null);
+		otherReverse.numDigits++;
+		for (DigitNode ptr = other.front.next; ptr != null; ptr = ptr.next) {
+			DigitNode tempNode = new DigitNode(ptr.digit, otherReverse.front);
+			otherReverse.front = tempNode;
+			otherReverse.numDigits++;
+		}
+		
+		DigitNode thisPtr = thisReverse.front;
+		DigitNode otherPtr = otherReverse.front;
+		
+		while (thisPtr != null) {
+			if (thisPtr.digit > otherPtr.digit)
+				return 1;
+			else if (otherPtr.digit > thisPtr.digit)
+				return -1;
+			thisPtr = thisPtr.next;
+			otherPtr = otherPtr.next;
+		}
+		
+		return 0;
 	}
 
 	/**
@@ -346,14 +435,14 @@ public class BigInteger {
 	 * @return A new BigInteger which is the product of this BigInteger and other.
 	 */
 	public BigInteger multiply(BigInteger other) {
-		// THE FOLLOWING LINE IS A PLACEHOLDER SO THE PROGRAM COMPILES
-		// YOU WILL NEED TO CHANGE IT TO RETURN THE APPROPRIATE BigInteger
 		
+		// if any multiplicand is 0, return 0
 		if ((this.numDigits == 1 && this.front.digit == 0) || (other.numDigits == 1 && other.front.digit == 0))
 			return BigInteger.parse("0");
 		
 		boolean needNegative = false;
 		
+		// needsNegative if only 1 multiplicand is negative
 		if (this.negative || other.negative && !(this.negative && other.negative))
 			needNegative = true;
 		
@@ -421,7 +510,6 @@ public class BigInteger {
 				}
 					
 			}
-			System.out.println(addend.toString());
 			if (product == null)
 				product = addend;
 			else
