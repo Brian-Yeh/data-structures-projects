@@ -381,16 +381,6 @@ public class BigInteger {
 		else if (this.numDigits < other.numDigits)
 			return -1;
 		
-//		int thisValue = Math.abs(Integer.parseInt(this.toString()));
-//		int otherValue = Math.abs(Integer.parseInt(other.toString()));
-//		
-//		if (thisValue > otherValue)
-//			return 1;
-//		else if (thisValue < otherValue)
-//			return -1;
-//		else
-//			return 0;
-		
 		// In case where numDigits equal, find greater BigInteger by
 		// storing BigIntegers in greatest to least significant order and comparing
 		BigInteger thisReverse = new BigInteger();
