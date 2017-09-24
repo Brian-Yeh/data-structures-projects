@@ -61,10 +61,6 @@ public class BigInteger {
 	public static BigInteger parse(String integer) 
 	throws IllegalArgumentException {
 		
-		// error check first character
-//		if (!Character.isDigit(digit) && (digit != '-' && digit != '+'))
-//			throw new IllegalArgumentException();
-		
 		// check if String contains 1 invalid character
 		if (integer.length() == 1 && !Character.isDigit(integer.charAt(0)))
 			throw new IllegalArgumentException();
@@ -150,22 +146,23 @@ public class BigInteger {
 			return this.subtract(other);
 		
 		BigInteger sum = new BigInteger();
-		DigitNode bigOp, lilOp;
-		DigitNode sumLast = null;
-		boolean needCarry = false;
+		DigitNode topOp, botOp;
+		DigitNode sumLast = null; // pointer to last node of sum
+		boolean needCarry = false; // carry flag
 		
 		// determine which BigInteger has more digits
 		if (this.numDigits >= other.numDigits) {
-			bigOp = this.front;
-			lilOp = other.front;
+			topOp = this.front;
+			botOp = other.front;
 		} else {
-			bigOp = other.front;
-			lilOp = this.front;
+			topOp = other.front;
+			botOp = this.front;
 		}
 		
-		while(lilOp != null) {
+		// iterate for every digit in bottom operand
+		while(botOp != null) {
 			
-			int digitSum = bigOp.digit + lilOp.digit;
+			int digitSum = topOp.digit + botOp.digit;
 			
 			// resolve carry
 			if (needCarry) 
@@ -179,7 +176,7 @@ public class BigInteger {
 			// create new DigitNode
 			DigitNode d = new DigitNode(digitSum, null);
 			
-				
+			// resolve empty sum
 			if (sum.front == null) {
 				sum.front = d;
 				sumLast = sum.front;
@@ -190,14 +187,17 @@ public class BigInteger {
 			}
 			
 			sum.numDigits++;
-			bigOp = bigOp.next;
-			lilOp = lilOp.next;
+			topOp = topOp.next;
+			botOp = botOp.next;
 			
-			if (bigOp == null && lilOp == null && needCarry)
+			// add node for carry if needed
+			if (topOp == null && botOp == null && needCarry)
 				sumLast.next = new DigitNode(1, null);
 		}
-		while(bigOp != null) {
-			int digit = bigOp.digit;
+		
+		// iterate through remaining digits in top operand
+		while(topOp != null) {
+			int digit = topOp.digit;
 			
 			// resolve carry
 			if (needCarry) 
@@ -212,12 +212,14 @@ public class BigInteger {
 			sumLast.next = d;
 			sum.numDigits++;
 			sumLast = sumLast.next;
-			bigOp = bigOp.next;
+			topOp = topOp.next;
 			
-			if (bigOp == null && needCarry)
+			// add node for carry if needed
+			if (topOp == null && needCarry)
 				sumLast.next = new DigitNode(1, null);
 		}
 		
+		// resolve negative
 		if(this.negative == true && other.negative == true)
 			sum.negative = true;
 		
@@ -227,19 +229,8 @@ public class BigInteger {
 	private BigInteger subtract(BigInteger other) {
 		boolean needNegative = false;
 		DigitNode topOp, botOp; 
-//		if (this.negative == true && this.absLargerThan(other) == 1) {
-//			topOp = this.front;
-//			botOp = other.front;
-//			needNegative = true;
-//		} else if (this.negative == true && this.absLargerThan(other) == -1) {
-//			topOp = other.front;
-//			botOp = this.front;
-//			needNegative = true;
-//		} else if (other.negative == true && this.absLargerThan(other) == -1) {
-//			topOp = other.front;
-//			botOp = this.front;
-//		}
 		
+		// 
 		if (this.absLargerThan(other) == 1) {
 			topOp = this.front;
 			botOp = other.front;
@@ -324,6 +315,11 @@ public class BigInteger {
 		return diff;
 	}
 	
+	/** determines which BigInteger has greater absolute value
+	 *  BigInteger greater than argument returns 1
+	 *  BigInteger greater than argument returns -1
+	 *  BigInteger equal to argument returns 0
+	 */
 	private int absLargerThan(BigInteger other) {
 		if (this.numDigits > other.numDigits)
 			return 1;
@@ -353,6 +349,9 @@ public class BigInteger {
 		// THE FOLLOWING LINE IS A PLACEHOLDER SO THE PROGRAM COMPILES
 		// YOU WILL NEED TO CHANGE IT TO RETURN THE APPROPRIATE BigInteger
 		
+		if ((this.numDigits == 1 && this.front.digit == 0) || (other.numDigits == 1 && other.front.digit == 0))
+			return BigInteger.parse("0");
+		
 		boolean needNegative = false;
 		
 		if (this.negative || other.negative && !(this.negative && other.negative))
@@ -361,6 +360,7 @@ public class BigInteger {
 		DigitNode topOp, botOp, firstNode;
 		int loopNum = 0;
 		
+		// set largest multiplicand to top operator
 		if (this.numDigits >= other.numDigits) {
 			topOp = this.front;
 			firstNode = topOp;
@@ -375,25 +375,28 @@ public class BigInteger {
 		
 		int carry = 0;
 		int subProd = 0;
-		BigInteger product = new BigInteger();
-		product = BigInteger.parse("0");
+		BigInteger product = null;
+		DigitNode prodLast = null; // pointer for last node
 		
-		DigitNode prodLast = null;
+		// loop through and add addend to product
 		for (int i = 0; i < loopNum; i++) {
-			BigInteger tempProd = new BigInteger();
-			topOp = firstNode;
-			// add 0s for product addition
+			BigInteger addend = new BigInteger();
+			prodLast = null;
+			
+			topOp = firstNode; // set topOp to least significant digit of top multiplicand
+			
+			// add 0s depending on addend
 			for (int j = 0; j < i; j++) {
 				DigitNode d = new DigitNode(0, null);
 				if (prodLast == null) {
-					tempProd.front = d;
+					addend.front = d;
 					prodLast = d;
-					tempProd.numDigits++;
+					addend.numDigits++;
 				}
 				else {
 					prodLast.next = d;
 					prodLast = prodLast.next;
-					tempProd.numDigits++;
+					addend.numDigits++;
 				}
 			}
 			
@@ -402,23 +405,30 @@ public class BigInteger {
 				carry = subProd / 10;
 				DigitNode d = new DigitNode(subProd % 10, null);
 				if (prodLast == null) {
-					tempProd.front = d;
+					addend.front = d;
 					prodLast = d;
-					tempProd.numDigits++;
+					addend.numDigits++;
 				}
 				else {
 					prodLast.next = d;
 					prodLast = prodLast.next;
-					tempProd.numDigits++;
+					addend.numDigits++;
 				}
 				topOp = topOp.next;
 				if (topOp == null && carry > 0) {
 					prodLast.next = new DigitNode(carry, null);
-					tempProd.numDigits++;
+					addend.numDigits++;
 				}
 					
 			}
-			product = product.add(tempProd);
+			System.out.println(addend.toString());
+			if (product == null)
+				product = addend;
+			else
+				product = product.add(addend);
+			
+			carry = 0;
+			botOp = botOp.next;
 		}
 		if (needNegative)
 			product.negative = true;
