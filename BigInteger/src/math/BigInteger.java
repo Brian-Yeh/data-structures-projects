@@ -147,82 +147,31 @@ public class BigInteger {
 			return this.subtract(other);
 		
 		BigInteger sum = new BigInteger();
-		DigitNode topOp, botOp;
+		DigitNode a1 = this.front;
+		DigitNode a2 = other.front;
 		DigitNode sumLast = null; // pointer to last node of sum
-		boolean needCarry = false; // carry flag
 		
-		// determine which BigInteger has more digits
-		if (this.numDigits >= other.numDigits) {
-			topOp = this.front;
-			botOp = other.front;
-		} else {
-			topOp = other.front;
-			botOp = this.front;
-		}
-		
-		// iterate for every digit in bottom operand
-		while(botOp != null) {
-			
-			int digitSum = topOp.digit + botOp.digit;
-			
-			// resolve carry
-			if (needCarry) 
-				digitSum++;
-			if (digitSum > 9) {
-				digitSum %= 10;
-				needCarry = true;
-			} else
-				needCarry = false;
-			
-			// create new DigitNode
-			DigitNode d = new DigitNode(digitSum, null);
-			
-			// resolve empty sum
+		int tempSum = 0;
+		while (a1 != null || a2 != null) {
+			tempSum /= 10;
+			if (a1 != null) {
+				tempSum += a1.digit;
+				a1 = a1.next;
+			}
+			if (a2 != null) {
+				tempSum += a2.digit;
+				a2 = a2.next;
+			}
 			if (sum.front == null) {
-				sum.front = d;
+				sum.front = new DigitNode(tempSum % 10, null);
 				sumLast = sum.front;
-			}
-			else {
-				sumLast.next = d;
-				sumLast = d;
-			}
-			
-			sum.numDigits++;
-			topOp = topOp.next;
-			botOp = botOp.next;
-			
-			// add node for carry if needed
-			if (topOp == null && botOp == null && needCarry) {
-				sumLast.next = new DigitNode(1, null);
-				sum.numDigits++;
+			} else {
+				sumLast.next = new DigitNode(tempSum % 10, null);
+				sumLast = sumLast.next;
 			}
 		}
-		
-		// iterate through remaining digits in top operand
-		while(topOp != null) {
-			int digit = topOp.digit;
-			
-			// resolve carry
-			if (needCarry) 
-				digit++;
-			if (digit > 9) {
-				digit %= 10;
-				needCarry = true;
-			} else
-				needCarry = false;
-			
-			DigitNode d = new DigitNode((digit), null);
-			sumLast.next = d;
-			sum.numDigits++;
-			sumLast = sumLast.next;
-			topOp = topOp.next;
-			
-			// add node for carry if needed
-			if (topOp == null && needCarry) {
-				sumLast.next = new DigitNode(1, null);
-				sum.numDigits++;
-			}
-		}
+		if (tempSum / 10 == 1)
+			sumLast.next = new DigitNode(1, null);
 		
 		// resolve negative
 		if(this.negative == true && other.negative == true)
@@ -526,6 +475,7 @@ public class BigInteger {
 		for (DigitNode curr = front.next; curr != null; curr = curr.next) {
 				retval = curr.digit + retval;
 		}
+		
 		
 		if (negative) {
 			retval = '-' + retval;
