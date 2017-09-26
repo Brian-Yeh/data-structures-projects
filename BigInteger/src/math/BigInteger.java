@@ -164,14 +164,18 @@ public class BigInteger {
 			}
 			if (sum.front == null) {
 				sum.front = new DigitNode(tempSum % 10, null);
+				sum.numDigits++;
 				sumLast = sum.front;
 			} else {
 				sumLast.next = new DigitNode(tempSum % 10, null);
+				sum.numDigits++;
 				sumLast = sumLast.next;
 			}
 		}
-		if (tempSum / 10 == 1)
+		if (tempSum / 10 == 1) {
 			sumLast.next = new DigitNode(1, null);
+			sum.numDigits++;
+		}
 		
 		// resolve negative
 		if(this.negative == true && other.negative == true)
@@ -209,9 +213,17 @@ public class BigInteger {
 		int numZeros = 0;
 		boolean needZeros = false;
 		
-		while (botOp != null) {
+		while (topOp != null) {
 			int topDigit = topOp.digit;
-			int botDigit = botOp.digit;
+			topOp = topOp.next;
+			int botDigit;
+			
+			if (botOp == null)
+				botDigit = 0;
+			else {
+				botDigit = botOp.digit;
+				botOp = botOp.next;
+			}
 			
 			if (needCarry) {
 				topDigit--;
@@ -242,19 +254,11 @@ public class BigInteger {
 				}
 				DigitNode d = new DigitNode(topDigit - botDigit, null);
 				
-				topOp = topOp.next;
-				botOp = botOp.next;
-				
 				if (diff.front == null) {
 					diff.front = d;
 					diffLast = diff.front;
 				}
 				else {
-					if (topOp == null && botOp == null && d.digit == 0) {
-						
-						break;
-					}
-						
 					diffLast.next = d;
 					diffLast = d;
 				}
@@ -264,55 +268,9 @@ public class BigInteger {
 			else {
 				needZeros = true;
 				numZeros++;
-				topOp = topOp.next;
-				botOp = botOp.next;
 				continue;
 			}
 		}
-		
-		// iterate through rest of top operand
-		while (topOp != null) {
-			int digit = topOp.digit;
-			
-			// resolve carry
-			if (needCarry) {
-				digit--;
-				needCarry = false;
-			}
-			
-			if (digit < 0) {
-				digit += 10;
-				needCarry = true;
-			}
-			topOp = topOp.next;
-			
-			if (topOp == null && digit == 0) {
-				break;
-			}
-			
-			// account for zeros in front while adding nodes to diff
-			if (digit != 0) {
-				// add held zeros
-				if (needZeros == true) {
-					for (int i = 0; i < numZeros; i++) {
-						diffLast.next = new DigitNode(0, null);
-						diffLast = diffLast.next;
-						diff.numDigits++;
-					}
-					needZeros = false;
-					numZeros = 0;
-				}
-				DigitNode d = new DigitNode(digit, null);
-				diffLast.next = d;
-				diffLast = d;
-				diff.numDigits++;
-			} else {
-				needZeros = true;
-				numZeros++;
-				continue;
-			}
-		}
-		
 		if (needNegative)
 			diff.negative = true;
 		
@@ -382,7 +340,7 @@ public class BigInteger {
 		boolean needNegative = false;
 		
 		// needsNegative if only 1 multiplicand is negative
-		if (this.negative || other.negative && !(this.negative && other.negative))
+		if (this.negative ^ other.negative)
 			needNegative = true;
 		
 		DigitNode topOp, botOp, firstNode;
