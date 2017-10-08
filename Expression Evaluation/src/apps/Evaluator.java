@@ -25,8 +25,8 @@ public class Evaluator {
 			if (line.length() != 0) {
 				Scanner scfile = new Scanner(new File(line));
 				expr.loadSymbolValues(scfile);
-				//expr.printScalars();
-				//expr.printArrays();
+				expr.printScalars();
+				expr.printArrays();
 			}
 			System.out.println("Value of expression = " + expr.evaluate());
 		}
