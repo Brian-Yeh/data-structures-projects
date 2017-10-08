@@ -48,6 +48,33 @@ public class Expression {
      */
     public void buildSymbols() {
     		/** COMPLETE THIS METHOD **/
+    		scalars = new ArrayList<ScalarSymbol>();
+    		arrays = new ArrayList<ArraySymbol>();
+    		StringTokenizer stExpr = new StringTokenizer(expr, delims, true);
+    		Stack<String> eStack = new Stack<String>();
+    		
+    		// push tokens onto stack
+    		while(stExpr.hasMoreTokens()) {
+    			eStack.push(stExpr.nextToken());
+    		}
+    		
+    		String token;
+    		while (!eStack.isEmpty()) {
+    			token = eStack.pop();
+    			if (Character.isDigit(token.charAt(0)) || token.equals("\\t") || token.equals(" ") || token.equals("*")
+    					 || token.equals("+") || token.equals("/") || token.equals("-") || token.equals("(") || token.equals(")")
+    					 || token.equals("]"))
+    				continue;
+    			else if (token.equals("[")) { // if open bracket, pop next for array variable
+    				ArraySymbol newArray = new ArraySymbol(eStack.pop());
+    				if (!arrays.contains(newArray))
+    					arrays.add(newArray);
+    			} else {	
+    				ScalarSymbol newScalar = new ScalarSymbol(token);
+    				if (!scalars.contains(newScalar))
+    					scalars.add(newScalar);
+    			}
+    		}
     }
     
     /**
