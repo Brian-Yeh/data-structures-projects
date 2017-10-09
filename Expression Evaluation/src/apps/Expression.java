@@ -75,6 +75,8 @@ public class Expression {
     					scalars.add(newScalar);
     			}
     		}
+    		printScalars();
+    		printArrays();
     }
     
     /**
@@ -124,9 +126,133 @@ public class Expression {
     public float evaluate() {
     		/** COMPLETE THIS METHOD **/
     		// following line just a placeholder for compilation
-    		return 0;
+    		expr = expr.replaceAll("\\s+","");
+    		return evaluateRecur(0, expr.length()-1);
     }
+    
+    private float evaluateRecur(int start, int end) {
+		Stack<Float> opStack = new Stack<Float>(); // stack for operands
+		Stack<Character> pmStack = new Stack<Character>(); // stack for + and - operators
 
+		for (int i = start; i <= end; i++) {
+			char c = expr.charAt(i);
+			
+			if (c == '[' || expr.charAt(i) == '(') {
+				int closingIndex = getClosing(i);
+				opStack.push(evaluateRecur(i+1, closingIndex-1));
+				i = closingIndex;
+			} else if (c == '-' || c == '+') {
+				pmStack.push(c);	
+			} else if (c == '*' || c == '/') {
+				int opIndex = i+1;
+				int closingIndex = getClosing(opIndex);
+				char opA = expr.charAt(opIndex);
+				int closeAdj = -1;
+				if (opA == '(' || opA == '[') {
+					opIndex++;
+					closeAdj = 0;
+				}
+				switch (c) {
+					case '*': {
+						opStack.push(opStack.pop() * evaluateRecur(opIndex, closingIndex-1));
+						i = closingIndex;
+						break;
+					}
+					case '/': {
+						opStack.push(opStack.pop() / evaluateRecur(opIndex, closingIndex-1));
+						i = closingIndex;
+						break;
+					}
+				}
+				i += closeAdj;
+			} else if (Character.isDigit(c)) {
+				String s = String.valueOf(c);
+				while (i != end && Character.isDigit(expr.charAt(i+1))) {
+					s += expr.charAt(i+1);
+					i++;
+				}
+				opStack.push(Float.valueOf(s));
+			} else {
+				StringTokenizer st = new StringTokenizer(expr.substring(i, end+1), delims, true);
+				String tempSym = st.nextToken();
+				if (st.hasMoreTokens() && st.nextToken().equals("[")) {
+					ArraySymbol asym = new ArraySymbol(String.valueOf(tempSym));
+					int opIndex = 0;
+					for (int j = i; j < expr.length(); j++) {
+						if (expr.charAt(j) == '[') {
+							opIndex = j;
+							break;
+						}
+					}
+					int closeIndex = getClosing(opIndex);
+					int arrIndex = (int) evaluateRecur(opIndex+1, closeIndex-1);
+					float val = arrays.get(arrays.indexOf(asym)).values[arrIndex];
+					opStack.push(val);
+					i = closeIndex;
+				} else {
+					ScalarSymbol scal = new ScalarSymbol(tempSym);
+					float val = scalars.get(scalars.indexOf(scal)).value;
+					opStack.push(val);
+					// move i to end of variable
+					i += tempSym.length()-1;
+				}
+			}
+				
+		}
+		
+		pmStack = reverseStack(pmStack);
+		opStack = reverseStack(opStack);
+		
+		while (!pmStack.isEmpty()) {
+			char op = pmStack.pop();
+			switch (op) {
+				case '+': {
+					opStack.push(opStack.pop() + opStack.pop());
+					break;
+				}
+				case '-': {
+					opStack.push(opStack.pop() - opStack.pop());
+					break;
+				}
+			}
+		}
+    		return opStack.pop();
+    }
+    
+    private int getClosing(int start) {
+    		char c = expr.charAt(start);
+    		char[] arr = expr.toCharArray();
+    		Stack<Character> cstack = new Stack<Character>();
+    		
+    		if (c == '[') {
+    			for (int i = start; i < arr.length; i++) {
+        			if (arr[i] == '[')
+        				cstack.push(arr[i]);
+        			else if (arr[i] == ']')
+        				cstack.pop();
+        			if (cstack.isEmpty())
+        				return i;
+        		}
+    		} else if (c == '(') {
+    			for (int i = start; i < arr.length; i++) {
+        			if (arr[i] == '(')
+        				cstack.push(arr[i]);
+        			else if (arr[i] == ')')
+        				cstack.pop();
+        			if (cstack.isEmpty())
+        				return i;
+        		}
+    		}
+    		return start+1;
+    }
+    
+    private static <T> Stack<T> reverseStack(Stack<T> s) {
+    		 Stack<T> temp = new Stack<T>();
+    		 while (!s.isEmpty()) {
+    			 temp.push(s.pop());
+    		 }
+    		 return temp;
+    }
     /**
      * Utility method, prints the symbols in the scalars list
      */
