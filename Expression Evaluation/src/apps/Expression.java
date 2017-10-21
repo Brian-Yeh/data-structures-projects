@@ -75,8 +75,6 @@ public class Expression {
     					scalars.add(newScalar);
     			}
     		}
-    		printScalars();
-    		printArrays();
     }
     
     /**
@@ -124,9 +122,7 @@ public class Expression {
      * @return Result of evaluation
      */
     public float evaluate() {
-    		/** COMPLETE THIS METHOD **/
-    		// following line just a placeholder for compilation
-    		expr = expr.replaceAll("\\s+","");
+    		expr = expr.replaceAll("\\s+",""); // remove all spaces
     		return evaluateRecur(0, expr.length()-1);
     }
     
@@ -147,11 +143,13 @@ public class Expression {
 				int opIndex = i+1;
 				int closingIndex = getClosing(opIndex);
 				char opA = expr.charAt(opIndex);
-				int closeAdj = -1;
+				int closeAdj = -1; // index adjustment for i
+				
 				if (opA == '(' || opA == '[') {
 					opIndex++;
 					closeAdj = 0;
 				}
+				
 				switch (c) {
 					case '*': {
 						opStack.push(opStack.pop() * evaluateRecur(opIndex, closingIndex-1));
@@ -172,13 +170,15 @@ public class Expression {
 					i++;
 				}
 				opStack.push(Float.valueOf(s));
-			} else {
+			} else {		// must be Scalar or Array
 				StringTokenizer st = new StringTokenizer(expr.substring(i, end+1), delims, true);
 				String tempSym = st.nextToken();
+				
+				// check if Scalar or Array
 				if (st.hasMoreTokens() && st.nextToken().equals("[")) {
 					ArraySymbol asym = new ArraySymbol(String.valueOf(tempSym));
 					int opIndex = 0;
-					for (int j = i; j < expr.length(); j++) {
+					for (int j = i; j < expr.length(); j++) {	// find opening brace
 						if (expr.charAt(j) == '[') {
 							opIndex = j;
 							break;
@@ -193,7 +193,7 @@ public class Expression {
 					ScalarSymbol scal = new ScalarSymbol(tempSym);
 					float val = scalars.get(scalars.indexOf(scal)).value;
 					opStack.push(val);
-					// move i to end of variable
+					// move i to end of variable name
 					i += tempSym.length()-1;
 				}
 			}
@@ -219,40 +219,46 @@ public class Expression {
     		return opStack.pop();
     }
     
+    // Gets expr index of closing parenthesis or brace
     private int getClosing(int start) {
     		char c = expr.charAt(start);
     		char[] arr = expr.toCharArray();
     		Stack<Character> cstack = new Stack<Character>();
+    		char c2 = ' ';
     		
     		if (c == '[') {
-    			for (int i = start; i < arr.length; i++) {
-        			if (arr[i] == '[')
-        				cstack.push(arr[i]);
-        			else if (arr[i] == ']')
-        				cstack.pop();
-        			if (cstack.isEmpty())
-        				return i;
-        		}
+    			c2 = ']';
     		} else if (c == '(') {
-    			for (int i = start; i < arr.length; i++) {
-        			if (arr[i] == '(')
-        				cstack.push(arr[i]);
-        			else if (arr[i] == ')')
-        				cstack.pop();
-        			if (cstack.isEmpty())
-        				return i;
-        		}
+    			c2 = ')';
+    		} else if (Character.isDigit(c)) { // digit given
+    				int i = start;
+    				while (i != expr.length()-1 && Character.isDigit(expr.charAt(i+1))) {
+    					i++;
+    				}
+    				return i+1;
     		}
+
+		for (int i = start; i < arr.length; i++) {
+			if (arr[i] == c)
+				cstack.push(arr[i]);
+			else if (arr[i] == c2)
+				cstack.pop();
+			if (cstack.isEmpty())
+				return i;
+    		}
+		
     		return start+1;
     }
     
+    // Reverses Stack
     private static <T> Stack<T> reverseStack(Stack<T> s) {
-    		 Stack<T> temp = new Stack<T>();
+    		 Stack<T> rev = new Stack<T>();
     		 while (!s.isEmpty()) {
-    			 temp.push(s.pop());
+    			 rev.push(s.pop());
     		 }
-    		 return temp;
+    		 return rev;
     }
+    
     /**
      * Utility method, prints the symbols in the scalars list
      */
