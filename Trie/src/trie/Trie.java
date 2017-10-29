@@ -1,6 +1,7 @@
 package trie;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class implements a Trie. 
@@ -22,11 +23,67 @@ public class Trie {
 	 * @return Root of trie with all words inserted from the input array
 	 */
 	public static TrieNode buildTrie(String[] allWords) {
-		/** COMPLETE THIS METHOD **/
+		TrieNode root = new TrieNode(null, null, null);
 		
-		// FOLLOWING LINE IS A PLACEHOLDER TO ENSURE COMPILATION
-		// MODIFY IT AS NEEDED FOR YOUR IMPLEMENTATION
-		return null;
+		for (int i = 0; i < allWords.length; i++) {
+				insert(allWords, root, i, (short) 0);
+		}
+		
+		return root;
+	}
+	
+	private static TrieNode insert(String[] allWords, TrieNode root, int wordIndex, short startIndex) {
+		TrieNode ptr = root.firstChild;
+		TrieNode prev = null;
+		String newWord = allWords[wordIndex].substring(startIndex);
+		
+		while (ptr != null) {
+			if (newWord.charAt(0) == allWords[ptr.substr.wordIndex].charAt(ptr.substr.startIndex)) { // prefix match
+				String ptrWord = allWords[ptr.substr.wordIndex].substring(ptr.substr.startIndex,ptr.substr.endIndex+1);
+				int letterCount = 0; // number of matched letters in prefix
+				startIndex--; // adjust startIndex for loop
+				for (int j = 0; j < ptrWord.length(); j++) {
+					if (newWord.charAt(j) == ptrWord.charAt(j)) {
+						startIndex++;
+						letterCount++;
+					}
+					else
+						break;
+				}
+				// if entire substring matched, go to next child
+				if (letterCount == ptrWord.length()) {
+					insert(allWords, ptr, wordIndex, ++startIndex);
+					return root;
+				} else {
+					ptr.substr.endIndex = (short) (ptr.substr.startIndex + letterCount - 1);
+					// if ptr already contains a firstChild, make new firstChild point to old
+					if (ptr.firstChild != null) {
+						Indexes childIndex1 = new Indexes (ptr.substr.wordIndex, (short) (ptr.substr.startIndex+letterCount), (short)(ptr.substr.endIndex+letterCount));
+						TrieNode newFirstChild = new TrieNode(childIndex1, ptr.firstChild, null);
+						ptr.firstChild = newFirstChild;
+					} else {
+						Indexes childIndex1 = new Indexes (ptr.substr.wordIndex, (short) (ptr.substr.startIndex+letterCount), (short)(allWords[ptr.substr.wordIndex].length()-1));
+						ptr.firstChild = new TrieNode(childIndex1, null, null);
+					}
+
+					Indexes childIndex2 = new Indexes (wordIndex, ++startIndex, (short) (allWords[wordIndex].length()-1));
+					ptr.firstChild.sibling = new TrieNode(childIndex2, null, null);
+					return root;
+				}
+			} else {
+				prev = ptr;
+				ptr = ptr.sibling;
+				continue;
+			}
+		}
+		// if no matches with siblings, create new sibling
+		Indexes newIndexes = new Indexes(wordIndex, startIndex, (short) (allWords[wordIndex].length()-1));
+		if (prev == null) {
+			root.firstChild = new TrieNode(newIndexes, null, null);
+		} else {
+			prev.sibling = new TrieNode(newIndexes, null, null);
+		}
+		return root;
 	}
 	
 	/**
