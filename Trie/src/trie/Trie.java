@@ -107,10 +107,51 @@ public class Trie {
 	public static ArrayList<TrieNode> completionList(TrieNode root,
 										String[] allWords, String prefix) {
 		/** COMPLETE THIS METHOD **/
+		TrieNode ptr = root;
+		ArrayList<TrieNode> list = new ArrayList<TrieNode>();
 		
-		// FOLLOWING LINE IS A PLACEHOLDER TO ENSURE COMPILATION
-		// MODIFY IT AS NEEDED FOR YOUR IMPLEMENTATION
-		return null;
+		if (!prefix.isEmpty() && ptr.firstChild == null) 
+			return list;
+		
+		else if (prefix.isEmpty() && ptr.firstChild == null)
+			list.add(ptr);
+		
+		else if (prefix.isEmpty() && ptr.firstChild != null) {
+			ptr = ptr.firstChild;
+			while(ptr != null) {
+				list.addAll(completionList(ptr, allWords, prefix));
+				ptr = ptr.sibling;
+			}
+			return list;
+			
+		} else if (!prefix.isEmpty() && ptr.firstChild != null) {
+			ptr = ptr.firstChild;
+			while (ptr != null) {
+				if (prefix.charAt(0) == allWords[ptr.substr.wordIndex].charAt(ptr.substr.startIndex)) {
+					String ptrWord = allWords[ptr.substr.wordIndex].substring(ptr.substr.startIndex, ptr.substr.endIndex+1);
+					int letterCount = 0;
+					for (int i = 0; i < ptrWord.length(); i++) {
+						if (i == prefix.length())
+							break;
+						else if (prefix.charAt(i) == ptrWord.charAt(i))
+							letterCount++;
+						else
+							break;
+					}
+					ArrayList<TrieNode> returnList = completionList(ptr, allWords, prefix.substring(letterCount));
+					if (returnList == null)
+						break; // no match found
+					else
+						list.addAll(completionList(ptr, allWords, prefix.substring(letterCount)));
+				}
+				ptr = ptr.sibling;
+			}
+		}
+
+		if (list.isEmpty())
+			return null;
+		else
+			return list;
 	}
 	
 	public static void print(TrieNode root, String[] allWords) {
