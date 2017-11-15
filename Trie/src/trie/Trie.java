@@ -24,7 +24,7 @@ public class Trie {
 	 */
 	public static TrieNode buildTrie(String[] allWords) {
 		TrieNode root = new TrieNode(null, null, null);
-		
+		Arrays.sort(allWords);
 		for (int i = 0; i < allWords.length; i++) {
 				insert(allWords, root, i, (short) 0);
 		}
