@@ -71,6 +71,17 @@ public class LittleSearchEngine {
 	 */
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
 		/** COMPLETE THIS METHOD **/
+		for (String keyword: kws.keySet()) {
+			Occurrence keyOccur = kws.get(keyword);
+			if (keywordsIndex.containsKey(keyword)) {
+				keywordsIndex.get(keyword).add(keyOccur);
+				insertLastOccurrence(keywordsIndex.get(keyword));
+			} else {
+				ArrayList<Occurrence> occurList = new ArrayList<Occurrence>();
+				occurList.add(keyOccur);
+				keywordsIndex.put(keyword, occurList);
+			}
+		}
 	}	
 	
 	/**
@@ -118,10 +129,37 @@ public class LittleSearchEngine {
 	 */
 	public ArrayList<Integer> insertLastOccurrence(ArrayList<Occurrence> occs) {
 		/** COMPLETE THIS METHOD **/
+		ArrayList<Integer> midpoints = new ArrayList<Integer>();
+		if (occs.size() <= 1) {
+			return null;
+		}
+		Occurrence lastOccur = occs.get(occs.size()-1);
+		int lastOccurFreq = lastOccur.frequency;
+		occs.remove(occs.size()-1);
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		// reverse binary search
+		int left = 0, right = occs.size()-2, mid = 0;
+	
+		while (left <= right) {
+			mid = (left + right) / 2;
+			midpoints.add(mid);
+			int midFreq = occs.get(mid).frequency; 
+			
+			if (lastOccurFreq < midFreq)
+				right = mid-1;
+			else if (lastOccurFreq > midFreq)
+				left = mid+1;
+			else {
+				occs.add(mid, lastOccur);
+				return midpoints;
+			}	
+		}
+		if (occs.get(mid).frequency < lastOccurFreq)
+			occs.add(mid, lastOccur);
+		else
+			occs.add(mid+1, lastOccur);
+		
+		return midpoints;
 	}
 	
 	/**
@@ -168,10 +206,46 @@ public class LittleSearchEngine {
 	 */
 	public ArrayList<String> top5search(String kw1, String kw2) {
 		/** COMPLETE THIS METHOD **/
+		ArrayList<Occurrence> kw1List, kw2List;
+		kw1List = keywordsIndex.containsKey(kw1) ? keywordsIndex.get(kw1) : new ArrayList<Occurrence>();
+		kw2List = keywordsIndex.containsKey(kw2) ? keywordsIndex.get(kw2) : new ArrayList<Occurrence>();
+		ArrayList<String> top5List = new ArrayList<String>();
+		Queue<String> docQ = new LinkedList<String>();
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		// add kw1List and kw2List into a queue
+		int kw1Index = 0, kw2Index = 0;
+		while (kw1Index < kw1List.size() && kw2Index < kw2List.size()) {
+			if(kw1List.get(kw1Index).frequency >= kw2List.get(kw2Index).frequency) {
+				docQ.add(kw1List.get(kw1Index).document);
+				kw1Index++;
+			} else {
+				docQ.add(kw2List.get(kw2Index).document);
+				kw2Index++;
+			}
+		}
+		if (kw1Index < kw1List.size()) {
+			while(kw1Index < kw1List.size()) {
+				docQ.add(kw1List.get(kw1Index).document);
+				kw1Index++;
+			}
+		}
+		if (kw2Index < kw2List.size()) {
+			while (kw2Index < kw2List.size()) {
+				docQ.add(kw2List.get(kw2Index).document);
+				kw2Index++;
+			}
+		}
+		
+		for (int i = 0; i < 5; i++) {
+			while (!docQ.isEmpty() && top5List.contains(docQ.peek()))
+				docQ.remove();
+			if (docQ.isEmpty())
+				break;
+			else
+				top5List.add(docQ.remove());
+		}
+		
+		return top5List;
 	
 	}
 }
