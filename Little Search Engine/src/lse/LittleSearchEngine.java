@@ -40,11 +40,24 @@ public class LittleSearchEngine {
 	 */
 	public HashMap<String,Occurrence> loadKeywordsFromDocument(String docFile) 
 	throws FileNotFoundException {
-		/** COMPLETE THIS METHOD **/
+		Scanner sc;
+		sc = new Scanner(new File(docFile));
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		HashMap<String,Occurrence> docHash = new HashMap<String,Occurrence>();
+		while (sc.hasNext()) {
+			String newKeyword = getKeyword(sc.next());
+			if (newKeyword == null)
+				continue;
+			
+			if (docHash.containsKey(newKeyword)) { // if key exists update frequency
+				docHash.get(newKeyword).frequency++; 
+			} else {
+				docHash.put(newKeyword, new Occurrence(docFile, 1));
+			}
+		}
+		sc.close();
+		
+		return docHash;
 	}
 	
 	/**
@@ -58,7 +71,7 @@ public class LittleSearchEngine {
 	 */
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
 		/** COMPLETE THIS METHOD **/
-	}
+	}	
 	
 	/**
 	 * Given a word, returns it as a keyword if it passes the keyword test,
@@ -72,11 +85,24 @@ public class LittleSearchEngine {
 	 * @return Keyword (word without trailing punctuation, LOWER CASE)
 	 */
 	public String getKeyword(String word) {
-		/** COMPLETE THIS METHOD **/
+		int wordLen = word.length()-1;
+		 // remove trailing non-alphabetic characters
+		while (wordLen >= 0 && !Character.isAlphabetic(word.charAt(wordLen))) {
+			wordLen--;
+		}
+		if (wordLen == -1)
+			return null;
+		word = word.substring(0, ++wordLen);
+		word = word.toLowerCase();
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		for (int i = 0; i < word.length(); i++) {
+			if (!Character.isAlphabetic(word.charAt(i))) // if any character invalid 
+				return null;
+		}
+		if (noiseWords.contains(word))
+			return null;
+		
+		return word;
 	}
 	
 	/**
