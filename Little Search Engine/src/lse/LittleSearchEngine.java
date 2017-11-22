@@ -47,8 +47,7 @@ public class LittleSearchEngine {
 		while (sc.hasNext()) {
 			String newKeyword = getKeyword(sc.next());
 			if (newKeyword == null)
-				continue;
-			
+				continue;		
 			if (docHash.containsKey(newKeyword)) { // if key exists update frequency
 				docHash.get(newKeyword).frequency++; 
 			} else {
@@ -70,9 +69,8 @@ public class LittleSearchEngine {
 	 * @param kws Keywords hash table for a document
 	 */
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
-		/** COMPLETE THIS METHOD **/
 		for (String keyword: kws.keySet()) {
-			Occurrence keyOccur = kws.get(keyword);
+ 			Occurrence keyOccur = kws.get(keyword);
 			if (keywordsIndex.containsKey(keyword)) {
 				keywordsIndex.get(keyword).add(keyOccur);
 				insertLastOccurrence(keywordsIndex.get(keyword));
@@ -128,7 +126,6 @@ public class LittleSearchEngine {
 	 *         your code - it is not used elsewhere in the program.
 	 */
 	public ArrayList<Integer> insertLastOccurrence(ArrayList<Occurrence> occs) {
-		/** COMPLETE THIS METHOD **/
 		ArrayList<Integer> midpoints = new ArrayList<Integer>();
 		if (occs.size() <= 1) {
 			return null;
@@ -205,47 +202,43 @@ public class LittleSearchEngine {
 	 *         frequencies. The result size is limited to 5 documents. If there are no matches, returns null.
 	 */
 	public ArrayList<String> top5search(String kw1, String kw2) {
-		/** COMPLETE THIS METHOD **/
 		ArrayList<Occurrence> kw1List, kw2List;
 		kw1List = keywordsIndex.containsKey(kw1) ? keywordsIndex.get(kw1) : new ArrayList<Occurrence>();
 		kw2List = keywordsIndex.containsKey(kw2) ? keywordsIndex.get(kw2) : new ArrayList<Occurrence>();
 		ArrayList<String> top5List = new ArrayList<String>();
-		Queue<String> docQ = new LinkedList<String>();
 		
-		// add kw1List and kw2List into a queue
 		int kw1Index = 0, kw2Index = 0;
 		while (kw1Index < kw1List.size() && kw2Index < kw2List.size()) {
+			String newDoc;
 			if(kw1List.get(kw1Index).frequency >= kw2List.get(kw2Index).frequency) {
-				docQ.add(kw1List.get(kw1Index).document);
+				newDoc = kw1List.get(kw1Index).document;
 				kw1Index++;
 			} else {
-				docQ.add(kw2List.get(kw2Index).document);
+				newDoc = kw2List.get(kw2Index).document;
 				kw2Index++;
 			}
+			if (!top5List.contains(newDoc))
+				top5List.add(newDoc);
 		}
+		// if kw1List has elements remaining
 		if (kw1Index < kw1List.size()) {
 			while(kw1Index < kw1List.size()) {
-				docQ.add(kw1List.get(kw1Index).document);
+				String newDoc = kw1List.get(kw1Index).document;
 				kw1Index++;
+				if (!top5List.contains(newDoc))
+					top5List.add(newDoc);
 			}
 		}
+		// if kw2List has elements remaining
 		if (kw2Index < kw2List.size()) {
 			while (kw2Index < kw2List.size()) {
-				docQ.add(kw2List.get(kw2Index).document);
+				String newDoc = kw2List.get(kw2Index).document;
 				kw2Index++;
+				if (!top5List.contains(newDoc))
+					top5List.add(newDoc);
 			}
-		}
-		
-		for (int i = 0; i < 5; i++) {
-			while (!docQ.isEmpty() && top5List.contains(docQ.peek()))
-				docQ.remove();
-			if (docQ.isEmpty())
-				break;
-			else
-				top5List.add(docQ.remove());
 		}
 		
 		return top5List;
-	
 	}
 }
