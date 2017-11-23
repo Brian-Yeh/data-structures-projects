@@ -135,7 +135,7 @@ public class LittleSearchEngine {
 		occs.remove(occs.size()-1);
 		
 		// reverse binary search
-		int left = 0, right = occs.size()-2, mid = 0;
+		int left = 0, right = occs.size()-1, mid = 0;
 	
 		while (left <= right) {
 			mid = (left + right) / 2;
@@ -143,9 +143,9 @@ public class LittleSearchEngine {
 			int midFreq = occs.get(mid).frequency; 
 			
 			if (lastOccurFreq < midFreq)
-				right = mid-1;
-			else if (lastOccurFreq > midFreq)
 				left = mid+1;
+			else if (lastOccurFreq > midFreq)
+				right = mid-1;
 			else {
 				occs.add(mid, lastOccur);
 				return midpoints;
@@ -238,7 +238,9 @@ public class LittleSearchEngine {
 					top5List.add(newDoc);
 			}
 		}
-		
+		while (top5List.size() > 5) {
+			top5List.remove(top5List.size()-1);
+		}
 		return top5List;
 	}
 }
