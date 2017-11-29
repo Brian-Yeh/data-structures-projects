@@ -40,11 +40,23 @@ public class LittleSearchEngine {
 	 */
 	public HashMap<String,Occurrence> loadKeywordsFromDocument(String docFile) 
 	throws FileNotFoundException {
-		/** COMPLETE THIS METHOD **/
+		Scanner sc;
+		sc = new Scanner(new File(docFile));
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		HashMap<String,Occurrence> docHash = new HashMap<String,Occurrence>();
+		while (sc.hasNext()) {
+			String newKeyword = getKeyword(sc.next());
+			if (newKeyword == null)
+				continue;		
+			if (docHash.containsKey(newKeyword)) { // if key exists update frequency
+				docHash.get(newKeyword).frequency++; 
+			} else {
+				docHash.put(newKeyword, new Occurrence(docFile, 1));
+			}
+		}
+		sc.close();
+		
+		return docHash;
 	}
 	
 	/**
@@ -57,8 +69,18 @@ public class LittleSearchEngine {
 	 * @param kws Keywords hash table for a document
 	 */
 	public void mergeKeywords(HashMap<String,Occurrence> kws) {
-		/** COMPLETE THIS METHOD **/
-	}
+		for (String keyword: kws.keySet()) {
+ 			Occurrence keyOccur = kws.get(keyword);
+			if (keywordsIndex.containsKey(keyword)) {
+				keywordsIndex.get(keyword).add(keyOccur);
+				insertLastOccurrence(keywordsIndex.get(keyword));
+			} else {
+				ArrayList<Occurrence> occurList = new ArrayList<Occurrence>();
+				occurList.add(keyOccur);
+				keywordsIndex.put(keyword, occurList);
+			}
+		}
+	}	
 	
 	/**
 	 * Given a word, returns it as a keyword if it passes the keyword test,
@@ -72,11 +94,24 @@ public class LittleSearchEngine {
 	 * @return Keyword (word without trailing punctuation, LOWER CASE)
 	 */
 	public String getKeyword(String word) {
-		/** COMPLETE THIS METHOD **/
+		int wordLen = word.length()-1;
+		 // remove trailing non-alphabetic characters
+		while (wordLen >= 0 && !Character.isAlphabetic(word.charAt(wordLen))) {
+			wordLen--;
+		}
+		if (wordLen == -1)
+			return null;
+		word = word.substring(0, ++wordLen);
+		word = word.toLowerCase();
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		for (int i = 0; i < word.length(); i++) {
+			if (!Character.isAlphabetic(word.charAt(i))) // if any character invalid 
+				return null;
+		}
+		if (noiseWords.contains(word))
+			return null;
+		
+		return word;
 	}
 	
 	/**
@@ -91,11 +126,37 @@ public class LittleSearchEngine {
 	 *         your code - it is not used elsewhere in the program.
 	 */
 	public ArrayList<Integer> insertLastOccurrence(ArrayList<Occurrence> occs) {
-		/** COMPLETE THIS METHOD **/
+		ArrayList<Integer> midpoints = new ArrayList<Integer>();
+		if (occs.size() <= 1) {
+			return null;
+		}
+		Occurrence lastOccur = occs.get(occs.size()-1);
+		int lastOccurFreq = lastOccur.frequency;
+		occs.remove(occs.size()-1);
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
+		// reverse binary search
+		int left = 0, right = occs.size()-1, mid = 0;
+	
+		while (left <= right) {
+			mid = (left + right) / 2;
+			midpoints.add(mid);
+			int midFreq = occs.get(mid).frequency; 
+			
+			if (lastOccurFreq < midFreq)
+				left = mid+1;
+			else if (lastOccurFreq > midFreq)
+				right = mid-1;
+			else {
+				occs.add(mid, lastOccur);
+				return midpoints;
+			}	
+		}
+		if (occs.get(mid).frequency < lastOccurFreq)
+			occs.add(mid, lastOccur);
+		else
+			occs.add(mid+1, lastOccur);
+		
+		return midpoints;
 	}
 	
 	/**
@@ -141,11 +202,45 @@ public class LittleSearchEngine {
 	 *         frequencies. The result size is limited to 5 documents. If there are no matches, returns null.
 	 */
 	public ArrayList<String> top5search(String kw1, String kw2) {
-		/** COMPLETE THIS METHOD **/
+		ArrayList<Occurrence> kw1List, kw2List;
+		kw1List = keywordsIndex.containsKey(kw1) ? keywordsIndex.get(kw1) : new ArrayList<Occurrence>();
+		kw2List = keywordsIndex.containsKey(kw2) ? keywordsIndex.get(kw2) : new ArrayList<Occurrence>();
+		ArrayList<String> top5List = new ArrayList<String>();
 		
-		// following line is a placeholder to make the program compile
-		// you should modify it as needed when you write your code
-		return null;
-	
+		int kw1Index = 0, kw2Index = 0;
+		while (kw1Index < kw1List.size() && kw2Index < kw2List.size()) {
+			String newDoc;
+			if(kw1List.get(kw1Index).frequency >= kw2List.get(kw2Index).frequency) {
+				newDoc = kw1List.get(kw1Index).document;
+				kw1Index++;
+			} else {
+				newDoc = kw2List.get(kw2Index).document;
+				kw2Index++;
+			}
+			if (!top5List.contains(newDoc))
+				top5List.add(newDoc);
+		}
+		// if kw1List has elements remaining
+		if (kw1Index < kw1List.size()) {
+			while(kw1Index < kw1List.size()) {
+				String newDoc = kw1List.get(kw1Index).document;
+				kw1Index++;
+				if (!top5List.contains(newDoc))
+					top5List.add(newDoc);
+			}
+		}
+		// if kw2List has elements remaining
+		if (kw2Index < kw2List.size()) {
+			while (kw2Index < kw2List.size()) {
+				String newDoc = kw2List.get(kw2Index).document;
+				kw2Index++;
+				if (!top5List.contains(newDoc))
+					top5List.add(newDoc);
+			}
+		}
+		while (top5List.size() > 5) {
+			top5List.remove(top5List.size()-1);
+		}
+		return top5List;
 	}
 }
