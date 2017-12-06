@@ -20,14 +20,49 @@ public class Friends {
 	 *         path from p1 to p2
 	 */
 	public static ArrayList<String> shortestChain(Graph g, String p1, String p2) {
+		Queue<Integer> q = new Queue<Integer>();
 		
-		/** COMPLETE THIS METHOD **/
+		int[] path = new int[g.members.length];
+		Arrays.fill(path, -1);
 		
-		// FOLLOWING LINE IS A PLACEHOLDER TO MAKE COMPILER HAPPY
-		// CHANGE AS REQUIRED FOR YOUR IMPLEMENTATION
+		int p1Vertex = g.map.get(p1);
+		int p2Vertex = g.map.get(p2);
+		q.enqueue(p1Vertex);
+		path[p1Vertex] = p1Vertex;
+		
+		while(!q.isEmpty()) {
+			int vertex = q.dequeue();
+			
+			Friend f = g.members[vertex].first;
+			while (f != null) {
+				if (f.fnum == p2Vertex) { // if p2 found
+					path[f.fnum] = vertex;
+					return generatePath(g, path, p1Vertex, p2Vertex);
+				}	
+				if (path[f.fnum] == -1) {
+					q.enqueue(f.fnum);
+					path[f.fnum] = vertex;
+				}
+				f = f.next;
+			}
+		}
 		return null;
 	}
 	
+	private static ArrayList<String> generatePath(Graph g, int[] prevVertices, int start, int end) {
+		int vertex = end;
+		Stack<Integer> pathStack = new Stack<Integer>();
+		ArrayList<String> path = new ArrayList<String>();
+		while (vertex != start) {
+			pathStack.push(vertex);
+			vertex = prevVertices[vertex];
+		}
+		pathStack.push(start);
+		while (!pathStack.isEmpty()) {
+			path.add(g.members[pathStack.pop()].name);
+		}
+		return path;
+	}
 	/**
 	 * Finds all cliques of students in a given school.
 	 * 
