@@ -77,11 +77,73 @@ public class Friends {
 	public static ArrayList<ArrayList<String>> cliques(Graph g, String school) {
 		
 		/** COMPLETE THIS METHOD **/
+		if (!schoolFound(g, school))
+			return null;
+		
+		ArrayList<ArrayList<String>> cliqueList = new ArrayList<ArrayList<String>>();
+		boolean[] visited = new boolean[g.members.length];
+		Queue<Integer> q = new Queue<Integer>();
+		
+//		int firstInSchool = -1;
+//		for (int i = 0; i < g.members.length; i++) {
+//			String currentSchool = g.members[i].school;
+//			if (currentSchool.equals(school)) {
+//				firstInSchool = i;
+//				break;
+//			}
+//		}
+//		if (firstInSchool == -1)
+//			return null;
+//		
+//		q.enqueue(firstInSchool);
+//		visited[firstInSchool] = true;
+		
+		int cliqueNum = 0;
+		boolean newCliqueFlag = false;
+		for (int i = 0; i < g.members.length; i++) {
+			newCliqueFlag = false;
+			if (visited[i])
+				continue;
+			
+			q.enqueue(i);
+			while (!q.isEmpty()) {
+				int vertex = q.dequeue();
+				if (visited[vertex])
+					continue;
+				
+				if(g.members[vertex].school.equals(school)) {
+					cliqueList.get(cliqueNum).add(g.members[vertex].name);
+					newCliqueFlag = true;
+				}
+				visited[vertex] = true;
+		
+				Friend f = g.members[vertex].first;
+				while (f != null) {
+					if (!visited[f.fnum]) {
+						q.enqueue(f.fnum);
+					}
+					f = f.next;
+				}
+			}
+			if (newCliqueFlag)
+				cliqueNum++;
+			
+		}
+		
 		
 		// FOLLOWING LINE IS A PLACEHOLDER TO MAKE COMPILER HAPPY
 		// CHANGE AS REQUIRED FOR YOUR IMPLEMENTATION
-		return null;
+		return cliqueList;
 		
+	}
+	
+	private static boolean schoolFound(Graph g, String school) {
+		for (int i = 0; i < g.members.length; i++) {
+			if (g.members[i].school.equals(school)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
