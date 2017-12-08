@@ -75,75 +75,44 @@ public class Friends {
 	 *         given school
 	 */
 	public static ArrayList<ArrayList<String>> cliques(Graph g, String school) {
-		
-		/** COMPLETE THIS METHOD **/
-		if (!schoolFound(g, school))
-			return null;
-		
 		ArrayList<ArrayList<String>> cliqueList = new ArrayList<ArrayList<String>>();
 		boolean[] visited = new boolean[g.members.length];
 		Queue<Integer> q = new Queue<Integer>();
 		
-//		int firstInSchool = -1;
-//		for (int i = 0; i < g.members.length; i++) {
-//			String currentSchool = g.members[i].school;
-//			if (currentSchool.equals(school)) {
-//				firstInSchool = i;
-//				break;
-//			}
-//		}
-//		if (firstInSchool == -1)
-//			return null;
-//		
-//		q.enqueue(firstInSchool);
-//		visited[firstInSchool] = true;
-		
-		int cliqueNum = 0;
-		boolean newCliqueFlag = false;
 		for (int i = 0; i < g.members.length; i++) {
-			newCliqueFlag = false;
 			if (visited[i])
 				continue;
 			
+			ArrayList<String> newClique = new ArrayList<String>();
 			q.enqueue(i);
 			while (!q.isEmpty()) {
 				int vertex = q.dequeue();
 				if (visited[vertex])
 					continue;
 				
-				if(g.members[vertex].school.equals(school)) {
-					cliqueList.get(cliqueNum).add(g.members[vertex].name);
-					newCliqueFlag = true;
+				if(g.members[vertex].student && g.members[vertex].school.equals(school)) {
+					newClique.add(g.members[vertex].name);
 				}
 				visited[vertex] = true;
 		
 				Friend f = g.members[vertex].first;
 				while (f != null) {
-					if (!visited[f.fnum]) {
+					if (!visited[f.fnum] 
+							&& g.members[f.fnum].student 
+							&& g.members[f.fnum].school.equals(school)) {
 						q.enqueue(f.fnum);
 					}
 					f = f.next;
 				}
 			}
-			if (newCliqueFlag)
-				cliqueNum++;
+			if (newClique.size() != 0)
+				cliqueList.add(newClique);
 			
 		}
+		if (cliqueList.size() == 0)
+			return null;
 		
-		
-		// FOLLOWING LINE IS A PLACEHOLDER TO MAKE COMPILER HAPPY
-		// CHANGE AS REQUIRED FOR YOUR IMPLEMENTATION
 		return cliqueList;
-		
-	}
-	
-	private static boolean schoolFound(Graph g, String school) {
-		for (int i = 0; i < g.members.length; i++) {
-			if (g.members[i].school.equals(school)) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	/**
@@ -153,13 +122,81 @@ public class Friends {
 	 * @return Names of all connectors. Null if there are no connectors.
 	 */
 	public static ArrayList<String> connectors(Graph g) {
+		int numMembers = g.members.length;
+		if (numMembers <= 2)
+			return null;
 		
-		/** COMPLETE THIS METHOD **/
+		ArrayList<String> connectorList = new ArrayList<String>();
+		boolean[] visited = new boolean[numMembers];
+		int[] dfsNumList = new int[numMembers];
+		int[] backNumList = new int[numMembers];
+		Stack<Integer> vStack = new Stack<Integer>();
+		int dfsNum = 0;
+		int backNum = 0;
+		boolean noValidNeighbors = true;
 		
-		// FOLLOWING LINE IS A PLACEHOLDER TO MAKE COMPILER HAPPY
-		// CHANGE AS REQUIRED FOR YOUR IMPLEMENTATION
-		return null;
+		// get number of root neighbors
+		int numRootNeighbors = 0;
+		Friend rootF = g.members[0].first;
+		while (rootF != null) {
+			numRootNeighbors++;
+			rootF = rootF.next;
+		}
 		
+		for(int i = 0; i < numMembers; i++) {
+			if (visited[i])
+				continue;
+			
+			dfsNumList[i] = dfsNum;
+			backNumList[i] = backNum;
+			vStack.push(i);
+			
+			while (!vStack.isEmpty()) {
+				int vertex = vStack.peek();
+				if(!visited[vertex]) {
+					dfsNum++;
+					backNum++;
+					dfsNumList[vertex] = dfsNum;
+					backNumList[vertex] = backNum;
+				}
+				visited[vertex] = true;
+				
+				// get neighbors
+				noValidNeighbors = true;
+				Friend f = g.members[vertex].first;
+				while (f != null) {
+					int neighbor = f.fnum;
+					if (!visited[neighbor]) {
+						vStack.push(neighbor);
+						noValidNeighbors = false;
+						break;
+					} else {
+						backNumList[vertex] = Math.min(backNumList[vertex], dfsNumList[neighbor]);
+					}
+					f = f.next;
+				}
+				if (noValidNeighbors) {
+					vStack.pop();
+					if (vStack.isEmpty())
+						break;
+					int prevVertex = vStack.peek();
+					
+					// case where root is not a connector
+					if (prevVertex == 0 && numRootNeighbors == 1 && vStack.size() == 1)
+						break;
+					
+					if (dfsNumList[prevVertex] > backNumList[vertex])
+						backNumList[prevVertex] = Math.min(backNumList[prevVertex], backNumList[vertex]);
+					
+					else if (dfsNumList[prevVertex] <= dfsNumList[vertex])
+						if (!connectorList.contains(g.members[prevVertex].name))
+							connectorList.add(g.members[prevVertex].name);
+				}
+			}
+		}
+		if (connectorList.size() == 0)
+			return null;
+		
+		return connectorList;
 	}
 }
-
