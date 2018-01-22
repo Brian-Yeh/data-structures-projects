@@ -1,4 +1,4 @@
-package friends;
+package connections;
 
 import java.util.HashMap;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package trie;
+package prefixtree;
 
 /**
  * This class encapsulates the set of 3 indexes that point to a substring 

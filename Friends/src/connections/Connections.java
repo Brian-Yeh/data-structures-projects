@@ -1,11 +1,11 @@
-package friends;
+package connections;
 
 import structures.Queue;
 import structures.Stack;
 
 import java.util.*;
 
-public class Friends {
+public class Connections {
 
 	/**
 	 * Finds the shortest chain of people from p1 to p2.

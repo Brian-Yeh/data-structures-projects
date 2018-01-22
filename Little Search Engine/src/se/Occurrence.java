@@ -1,4 +1,4 @@
-package lse;
+package se;
 
 /**
  * This class encapsulates an occurrences of a keyword in a document. It stores the

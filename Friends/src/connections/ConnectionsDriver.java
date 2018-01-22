@@ -1,11 +1,11 @@
-package friends;
+package connections;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class FriendsDriver {
+public class ConnectionsDriver {
 
 	
 	public static void main(String[] args) {
@@ -19,7 +19,7 @@ public class FriendsDriver {
 		Graph g = new Graph(fileSC);
 		fileSC.close();
 		
-		ArrayList<String> connectorList = Friends.connectors(g);
+		ArrayList<String> connectorList = Connections.connectors(g);
 		if (connectorList == null)
 			System.out.println("No Connectors");
 		else {
@@ -27,37 +27,39 @@ public class FriendsDriver {
 			for (String s : connectorList)
 				System.out.print(s + " ");
 		}
-		//Scanner sc = new Scanner(System.in);
-		/*
+		Scanner sc = new Scanner(System.in);
+		System.out.println();
 		System.out.print("Enter p1: ");
 		String p1 = sc.nextLine();
 		System.out.print("Enter p2: ");
 		String p2 = sc.nextLine();
 		
-		ArrayList<String> shortest = Friends.shortestChain(g, p1, p2);
+		ArrayList<String> shortest = Connections.shortestChain(g, p1, p2);
 		if (shortest == null)
 			System.out.println("No path found.");
 		else {
 			for (String s : shortest)
 				System.out.print(s+" ");
-		}*/
+		}
 		
-//		System.out.print("Enter school: ");
-//		String school = sc.nextLine();
-//		
-//		ArrayList<ArrayList<String>> cliqueList = Friends.cliques(g, school);
-//		if (cliqueList == null)
-//			System.out.println("School not found");
-//		else { 
-//			for (int i = 0; i < cliqueList.size(); i++) {
-//				System.out.println("Clique " + (i+1));
-//				for (int j = 0; j < cliqueList.get(i).size(); j++) {
-//					System.out.print(cliqueList.get(i).get(j)+" ");
-//				}
-//				System.out.println();
-//			}
-//		}
-//		sc.close();
+		System.out.println();
+		System.out.print("Enter school: ");
+		String school = sc.nextLine();
+		
+		ArrayList<ArrayList<String>> cliqueList = Connections.cliques(g, school);
+		if (cliqueList == null)
+			System.out.println("School not found");
+		else { 
+			for (int i = 0; i < cliqueList.size(); i++) {
+				System.out.println("Clique " + (i+1));
+				for (int j = 0; j < cliqueList.get(i).size(); j++) {
+					System.out.print(cliqueList.get(i).get(j)+" ");
+				}
+				System.out.println();
+			}
+		}
+		System.out.println();
+		sc.close();
 		
 	}
 }

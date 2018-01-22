@@ -1,4 +1,4 @@
-package trie;
+package prefixtree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,10 +9,10 @@ import java.util.Arrays;
  * @author Sesh Venugopal
  *
  */
-public class Trie {
+public class PrefixTree {
 	
 	// prevent instantiation
-	private Trie() { }
+	private PrefixTree() { }
 	
 	/**
 	 * Builds a trie by inserting all words in the input array, one at a time,
