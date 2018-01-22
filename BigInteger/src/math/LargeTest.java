@@ -3,7 +3,7 @@ package math;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class BigTest {
+public class LargeTest {
 
 	static Scanner sc;
 	
@@ -12,7 +12,7 @@ public class BigTest {
 		System.out.print("\tEnter integer => ");
 		String integer = sc.nextLine();
 		try {
-			BigInteger bigInteger = BigInteger.parse(integer);
+			LargeInteger bigInteger = LargeInteger.parse(integer);
 			System.out.println("\t\tValue = " + bigInteger);
 		} catch (IllegalArgumentException e) {
 			System.out.println("\t\tIncorrect Format");
@@ -23,11 +23,11 @@ public class BigTest {
 	throws IOException {
 		System.out.print("\tEnter first integer => ");
 		String integer = sc.nextLine();
-		BigInteger firstBigInteger = BigInteger.parse(integer);
+		LargeInteger firstBigInteger = LargeInteger.parse(integer);
 		
 		System.out.print("\tEnter second integer => ");
 		integer = sc.nextLine();
-		BigInteger secondBigInteger = BigInteger.parse(integer);
+		LargeInteger secondBigInteger = LargeInteger.parse(integer);
 		
 		System.out.println("\t\tSum: " + firstBigInteger.add(secondBigInteger));
 	}
@@ -36,11 +36,11 @@ public class BigTest {
 	throws IOException {
 		System.out.print("\tEnter first integer => ");
 		String integer = sc.nextLine();
-		BigInteger firstBigInteger = BigInteger.parse(integer);
+		LargeInteger firstBigInteger = LargeInteger.parse(integer);
 		
 		System.out.print("\tEnter second integer => ");
 		integer = sc.nextLine();
-		BigInteger secondBigInteger = BigInteger.parse(integer);
+		LargeInteger secondBigInteger = LargeInteger.parse(integer);
 		
 		System.out.println("\t\tProduct: " + firstBigInteger.multiply(secondBigInteger));
 		

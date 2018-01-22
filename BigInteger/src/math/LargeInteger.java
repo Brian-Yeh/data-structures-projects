@@ -6,7 +6,7 @@ package math;
  * an integer.
  * 
  */
-public class BigInteger {
+public class LargeInteger {
 
 	/**
 	 * True if this is a negative integer
@@ -30,7 +30,7 @@ public class BigInteger {
 	 * Initializes this integer to a positive number with zero digits, in other
 	 * words this is the 0 (zero) valued integer.
 	 */
-	public BigInteger() {
+	public LargeInteger() {
 		negative = false;
 		numDigits = 0;
 		front = null;
@@ -58,7 +58,7 @@ public class BigInteger {
 	 * @return BigInteger instance that stores the input integer
 	 * @throws IllegalArgumentException If input is incorrectly formatted
 	 */
-	public static BigInteger parse(String integer) 
+	public static LargeInteger parse(String integer) 
 	throws IllegalArgumentException {
 		
 		// check if String contains 1 invalid character
@@ -78,7 +78,7 @@ public class BigInteger {
 				char digit = integer.charAt(index);
 				
 		// create new BigInteger and check if negative
-		BigInteger b = new BigInteger();
+		LargeInteger b = new LargeInteger();
 		if (digit == '-') {
 			b.negative = true;
 			digit = integer.charAt(index++);
@@ -140,13 +140,13 @@ public class BigInteger {
 	 * @param other Other integer to be added to this integer
 	 * @return Result integer
 	 */
-	public BigInteger add(BigInteger other) {
+	public LargeInteger add(LargeInteger other) {
 		
 		// test if subtract method needed
 		if (!(this.negative == true && other.negative == true) && (this.negative == true || other.negative == true))
 			return this.subtract(other);
 		
-		BigInteger sum = new BigInteger();
+		LargeInteger sum = new LargeInteger();
 		DigitNode a1 = this.front;
 		DigitNode a2 = other.front;
 		DigitNode sumLast = null; // pointer to last node of sum
@@ -185,7 +185,7 @@ public class BigInteger {
 	}
 	
 	// subtract function for add
-	private BigInteger subtract(BigInteger other) {
+	private LargeInteger subtract(LargeInteger other) {
 		boolean needNegative = false;
 		DigitNode topOp, botOp; 
 		
@@ -202,13 +202,13 @@ public class BigInteger {
 			if (other.negative == true)
 				needNegative = true;
 		} else {
-			return BigInteger.parse("0");
+			return LargeInteger.parse("0");
 		}
 		
 		// carry flag
 		boolean needCarry = false;
 		
-		BigInteger diff = new BigInteger();
+		LargeInteger diff = new LargeInteger();
 		DigitNode diffLast = null; // pointer for last node in diff
 		int numZeros = 0;
 		boolean needZeros = false;
@@ -282,7 +282,7 @@ public class BigInteger {
 	 *  BigInteger greater than argument returns -1
 	 *  BigInteger equal to argument returns 0
 	 */
-	private int absLargerThan(BigInteger other) {
+	private int absLargerThan(LargeInteger other) {
 		if (this.numDigits > other.numDigits)
 			return 1;
 		else if (this.numDigits < other.numDigits)
@@ -290,8 +290,8 @@ public class BigInteger {
 		
 		// In case where numDigits equal, find greater BigInteger by
 		// storing BigIntegers in greatest to least significant order and comparing
-		BigInteger thisReverse = new BigInteger();
-		BigInteger otherReverse = new BigInteger();
+		LargeInteger thisReverse = new LargeInteger();
+		LargeInteger otherReverse = new LargeInteger();
 		
 		thisReverse.front = new DigitNode(this.front.digit, null);
 		thisReverse.numDigits++;
@@ -331,11 +331,11 @@ public class BigInteger {
 	 * @param other BigInteger to be multiplied
 	 * @return A new BigInteger which is the product of this BigInteger and other.
 	 */
-	public BigInteger multiply(BigInteger other) {
+	public LargeInteger multiply(LargeInteger other) {
 		
 		// if any multiplicand is 0, return 0
 		if ((this.numDigits == 1 && this.front.digit == 0) || (other.numDigits == 1 && other.front.digit == 0))
-			return BigInteger.parse("0");
+			return LargeInteger.parse("0");
 		
 		boolean needNegative = false;
 		
@@ -361,12 +361,12 @@ public class BigInteger {
 		
 		int carry = 0;
 		int subProd = 0;
-		BigInteger product = null;
+		LargeInteger product = null;
 		DigitNode prodLast = null; // pointer for last node
 		
 		// loop through and add addend to product
 		for (int i = 0; i < loopNum; i++) {
-			BigInteger addend = new BigInteger();
+			LargeInteger addend = new LargeInteger();
 			prodLast = null;
 			
 			topOp = firstNode; // set topOp to least significant digit of top multiplicand

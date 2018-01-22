@@ -1,11 +1,11 @@
-package trie;
+package prefixtree;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class TrieApp {
+public class PrefixTreeApp {
 
 	static Scanner stdin = new Scanner(System.in);
 	
@@ -24,9 +24,9 @@ public class TrieApp {
 		sc.close();
 		
 		// build Trie
-		TrieNode root = Trie.buildTrie(allWords);
+		TrieNode root = PrefixTree.buildTrie(allWords);
 		// print it for verification
-		Trie.print(root, allWords);
+		PrefixTree.print(root, allWords);
 		// do completion lists
 		completionLists(root, allWords);
 	}
@@ -35,7 +35,7 @@ public class TrieApp {
 		System.out.print("\ncompletion list for (enter prefix, or 'quit'): ");
 		String prefix = stdin.nextLine().trim().toLowerCase();
 		while (!"quit".equals(prefix)) {
-			ArrayList<TrieNode> matches = Trie.completionList(root, allWords, prefix);
+			ArrayList<TrieNode> matches = PrefixTree.completionList(root, allWords, prefix);
 			printMatches(matches, allWords);
 			System.out.print("\ncompletion list for: ");
 			prefix = stdin.nextLine().trim().toLowerCase();

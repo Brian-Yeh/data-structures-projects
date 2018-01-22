@@ -1,4 +1,4 @@
-package lse;
+package se;
 
 import java.io.*;
 import java.util.*;
@@ -8,7 +8,7 @@ import java.util.*;
  * which it occurs, with frequency of occurrence in each page.
  *
  */
-public class LittleSearchEngine {
+public class SearchEngine {
 	
 	/**
 	 * This is a hash table of all keywords. The key is the actual keyword, and the associated value is
@@ -25,7 +25,7 @@ public class LittleSearchEngine {
 	/**
 	 * Creates the keyWordsIndex and noiseWords hash tables.
 	 */
-	public LittleSearchEngine() {
+	public SearchEngine() {
 		keywordsIndex = new HashMap<String,ArrayList<Occurrence>>(1000,2.0f);
 		noiseWords = new HashSet<String>(100,2.0f);
 	}
